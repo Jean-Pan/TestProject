@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-button @click="changeTest">{{ testing }}</el-button>
+    <el-button @click="getDate">{{ testing }}</el-button>
 
     <el-cascader
       :options="hostgroup"
@@ -229,12 +229,9 @@ export default {
       var that = this
       const path = 'http://127.0.0.1:5000/asset/network'
       axios.get(path).then(function(response) {
-        var msg = response.data.msg
+        var msg = response.data.hostgroup
         that.hostgroup = msg
       })
-    },
-    changeTest() {
-      this.hostgroup = [{ value: '1', label: 'A', 'children': [] }]
     }
   }
 }
