@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
-    <el-button @click="getDate">{{ testing }}</el-button>
-
+    <el-button @click="getHost">test</el-button>
     <el-cascader
       :options="hostgroup"
       placeholder="所有"
@@ -170,9 +169,8 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      testing: 'resp',
       show: true,
-      network: [
+      host: [
         {
           available: '0',
           name: 'Aest Machine',
@@ -220,19 +218,31 @@ export default {
           status: false
         }
       ],
-      hostgroup: [{ value: '1', label: '好看些', children: [] }],
+      hostgroup: [],
       props: {}
     }
   },
+  mounted() {
+    this.getHostgroup()
+  },
   methods: {
-    getDate() {
+    getHostgroup() {
       var that = this
       const path = 'http://127.0.0.1:5000/asset/network'
       axios.get(path).then(function(response) {
-        var msg = response.data.hostgroup
-        that.hostgroup = msg
+        var data = response.data.hostgroup
+        that.hostgroup = data
+      })
+    },
+    getHost() {
+      var that = this
+      const path = 'http://127.0.0.1:5000/asset/network'
+      axios.post(path).then(function(response) {
+        var data = response.data.host
+        that.host = data
       })
     }
+
   }
 }
 </script>

@@ -3,84 +3,90 @@ from app.zabbix import zapi
 from app.cmdb import blueprint
 
 
-@blueprint.route('/network', methods=['GET', 'POST'])
-def testing():
+@blueprint.route('/network', methods=['GET'])
+def get_hostgroup():
     class Node:
         def __init__(self, value, label):
             self.value = value
             self.label = label
             self.children = []
 
-        # def __repr__(self):
-        #     return {'value': self.value, 'label': self.label, 'children': self.children}
-
-        # def __str__(self):
-        #     return "{{'value': {}, 'label': {}, 'children': {}}}".format(self.value, self.label, self.children)
-        def turn(self):
-            return {'value': self.value, 'label': self.label, 'children': self.children}
-
-        def getValue(self):
+        def get_value(self):
             return self.value
 
-        def getLabel(self):
+        def get_label(self):
             return self.label
 
-        def getChild(self):
+        def get_child(self):
             return self.children
 
-        def next(self, node):
-            if isinstance(self.value, str):
-                self.value = [self.value].append(node.getValue())
+        def add(self, node):
+            if isinstance(self.value, list):
+                self.value.append(node.get_value())
             else:
-                self.value = self.value.append(node.getValue())
+                self.value = [self.get_value()]
+                self.value.append(node.get_value())
+
             return self.children
+
+        def convert(self):
+            if self.children:
+                return {'value': self.value, 'label': self.label, 'children': [i.convert() for i in self.children]}
+            else:
+                return {'value': self.value, 'label': self.label}
 
     class Tree:
-        def __init__(self, node):
-            self.head = [node]
-
-        # def __repr__(self):
-        #     return self.head
-        #
-        # def __str__(self):
-        #     return '{}'.format(self.head)
-
-        def test(self):
-            return [x.turn() for x in self.head]
+        def __init__(self, node=Node('', 'root')):
+            self.head = node
 
         def insert(self, node_list):
-            cur = self.head
+            cur = self.head.children
+
             for node in node_list:
                 if cur:
-                    for x in cur:
-                        print(1)
-                        if x and node.getLabel() == x.getLabel():
-                            print(2)
-                            cur = x.next(node)
-                        else:
-                            print(3)
-                            cur.append(node)
-                            cur = node.getChild()
+                    flag = True
+                    for i in cur:
+                        if i.get_label() == node.get_label():
+                            cur = i.add(node)
+                            flag = False
                             break
+                    if flag:
+                        cur.append(node)
+                        cur = node.get_child()
                 else:
-                    print(3)
                     cur.append(node)
-                    cur = node.getChild()
+                    cur = node.get_child()
+
+        def convert(self):
+            return self.head.convert()
 
     result = zapi.hostgroup.get(output=['name'], real_hosts='true')
-    hostgroup = []
-    temp = []
 
+    temp = []
     for i in result:
         temp.append(i['groupid'])
         i['name'] = i['name'].split('/')
-    root = Node(temp.copy(), '所有')
-    temp.clear()
+    any_group = Node(temp.copy(), '所有')
 
-    tree = Tree(root)
-    tree.insert([Node('a', 'test1'), Node('b', 'test2'), Node('c', 'test3')])
-    print(tree.test())
+    tree = Tree()
+
+    tree.insert([any_group])
+
+    for item in result:
+        node_list = []
+        for name in item['name']:
+            node_list.append(Node(item['groupid'], name))
+        tree.insert(node_list)
+
     response = {
-        'hostgroup': [{'value': '1', 'label': 'A'}, {'value': '2', 'label': 'B', 'children': []}]}
+        'hostgroup': tree.convert()['children']}
 
     return jsonify(response)
+
+
+@blueprint.route('/network', methods=['POST'])
+def get_host():
+    result = zapi.host.get(output=['available','host','status'])
+    print(result)
+    respone = {}
+    return jsonify(respone)

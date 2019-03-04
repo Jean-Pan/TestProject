@@ -1,5 +1,5 @@
-a = ['a']
-
+a = []
+b=None
+a.append(b)
 if a:
-    for x in a:
-        print(1)
+    print('yes')
