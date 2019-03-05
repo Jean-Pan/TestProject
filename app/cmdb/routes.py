@@ -86,7 +86,12 @@ def get_hostgroup():
 
 @blueprint.route('/network', methods=['POST'])
 def get_host():
-    result = zapi.host.get(output=['available','host','status'])
+    result = zapi.host.get(
+        output=['snmp_available', 'name', 'status'],
+        selectInterfaces=['ip', 'main', 'type'],
+        selectInventory=['vendor', 'model', 'type', 'tag'])
     print(result)
-    respone = {}
+    print(len(result))
+    respone = {'host': result}
+
     return jsonify(respone)

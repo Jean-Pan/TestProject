@@ -88,11 +88,11 @@
     <el-card class="box-card" style="margin-top: 20px">
       <el-row type="flex" justify="center">
         <el-table
-          :data="network"
+          :data="host.slice((currentPage-1)*pageSize,currentPage*pageSize)"
           :default-sort = "{prop: 'name'}"
           style="width: 100%"
           tooltip-effect="dark"
-          size="medium">
+          size="small">
 
           <el-table-column
             type="selection"
@@ -101,9 +101,9 @@
             label="状态"
             align="center"
             width="60px">
-            <template slot-scope="tableData">
-              <svg-icon v-if="tableData.row.available==='1'" icon-class="round_check_fill"/>
-              <svg-icon v-else-if="tableData.row.available==='2'" icon-class="round_close_fill"/>
+            <template slot-scope="host">
+              <svg-icon v-if="host.row.snmp_available==='1'" icon-class="round_check_fill"/>
+              <svg-icon v-else-if="host.row.snmp_available==='2'" icon-class="round_close_fill"/>
               <svg-icon v-else icon-class="round_question_fill"/>
             </template>
           </el-table-column>
@@ -111,27 +111,27 @@
             prop="name"
             label="名称"
             sortable
-            width="120px"/>
+            width="180px"/>
           <el-table-column
-            prop="interface"
+            prop="interfaces[0].ip"
             label="接口"
             sortable
-            width="120px"/>
+            width="180px"/>
           <el-table-column
-            prop="vendor"
+            prop="inventory.vendor"
             label="品牌"
             sortable/>
           <el-table-column
-            prop="model"
+            prop="inventory.model"
             label="型号"
             sortable
             width="120px"/>
           <el-table-column
-            prop="type"
+            prop="inventory.type"
             label="类型"
             sortable/>
           <el-table-column
-            prop="tag"
+            prop="inventory.tag"
             label="系统"
             sortable/>
           <el-table-column
@@ -139,9 +139,9 @@
             label="启用/禁用"
             sortable
             align="center">
-            <template slot-scope="tableData">
+            <template slot-scope="host">
               <el-switch
-                v-model="tableData.row.status"
+                v-model="host.row.status"
                 active-color="#67C23A"
                 inactive-color="#F56C6C"
                 @change="handleSwitch(scope.row,scope.$index)"/>
@@ -149,15 +149,19 @@
           </el-table-column>
         </el-table>
       </el-row>
-
       <el-pagination
-        :total="50"
-        layout="prev, pager, next"/>
+        :total="host.length"
+        :current-page="currentPage"
+        :page-sizes="[10,20,50]"
+        :page-size="20"
+        layout="sizes,prev, pager, next"
+        @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"/>
+
       <el-button type="text">启用</el-button>
       <el-button type="text">禁用</el-button>
       <el-button type="text">批量更新</el-button>
       <el-button type="text">删除</el-button>
-
     </el-card>
 
   </div>
@@ -170,56 +174,10 @@ export default {
   data() {
     return {
       show: true,
-      host: [
-        {
-          available: '0',
-          name: 'Aest Machine',
-          vendor: 'H3C',
-          model: 'H3C 3600',
-          interface: '127.0.0.1',
-          type: '交换机',
-          tag: '旅服系统',
-          status: true
-        }, {
-          available: '1',
-          name: 'Cest Machine',
-          vendor: 'H3C',
-          model: 'H3C 3600',
-          interface: '127.0.0.5',
-          type: '交换机',
-          tag: '旅服系统',
-          status: false
-        }, {
-          available: '0',
-          name: 'Dest Machine',
-          vendor: 'H3C',
-          model: 'H3C 3600',
-          interface: '127.0.0.3',
-          type: '交换机',
-          tag: '旅服系统',
-          status: true
-        }, {
-          available: '2',
-          name: 'Gest Machine',
-          vendor: 'H3C',
-          model: 'H3C 3600',
-          interface: '127.0.0.2',
-          type: '交换机',
-          tag: '旅服系统',
-          status: false
-        }, {
-          available: '0',
-          name: 'Test Machine',
-          vendor: 'H3C',
-          model: 'H3C 3600',
-          interface: '127.0.0.1',
-          type: '交换机',
-          tag: '旅服系统',
-          status: false
-        }
-      ],
+      host: [],
       hostgroup: [],
-      props: {}
+      currentPage: 1,
+      pageSize: 20
     }
   },
   mounted() {
@@ -241,8 +199,13 @@ export default {
         var data = response.data.host
         that.host = data
       })
+    },
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+    },
+    handleSizeChange(pageSize) {
+      this.pageSize = pageSize
     }
-
   }
 }
 </script>
