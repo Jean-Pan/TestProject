@@ -109,30 +109,35 @@
           </el-table-column>
           <el-table-column
             prop="name"
-            label="名称"
-            sortable
-            width="180px"/>
+            label="设备名称"
+            sortable/>
           <el-table-column
-            prop="interfaces[0].ip"
-            label="接口"
-            sortable
-            width="180px"/>
+            prop="name"
+            label="设备编号"
+            sortable/>
+          <el-table-column
+            prop="name"
+            label="安装时间"
+            sortable/>
           <el-table-column
             prop="inventory.vendor"
-            label="品牌"
+            label="设备品牌"
             sortable/>
           <el-table-column
             prop="inventory.model"
-            label="型号"
-            sortable
-            width="120px"/>
+            label="设备型号"
+            sortable/>
           <el-table-column
             prop="inventory.type"
-            label="类型"
+            label="设备类型"
+            sortable/>
+          <el-table-column
+            prop="interfaces[0].ip"
+            label="IP地址"
             sortable/>
           <el-table-column
             prop="inventory.tag"
-            label="系统"
+            label="应用系统"
             sortable/>
           <el-table-column
             prop="status"
@@ -154,7 +159,7 @@
         :current-page="currentPage"
         :page-sizes="[10,20,50]"
         :page-size="20"
-        layout="sizes,prev, pager, next"
+        layout="prev, pager, next, sizes"
         @current-change="handleCurrentChange"
         @size-change="handleSizeChange"/>
 
@@ -173,7 +178,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      show: true,
+      show: false,
       host: [],
       hostgroup: [],
       currentPage: 1,
