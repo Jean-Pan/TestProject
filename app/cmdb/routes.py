@@ -4,7 +4,7 @@ from app.cmdb import blueprint
 
 
 @blueprint.route('/network', methods=['GET'])
-def get_hostgroup():
+def get_hostgroup_list():
     class Node:
         def __init__(self, value, label):
             self.value = value
@@ -60,27 +60,30 @@ def get_hostgroup():
         def convert(self):
             return self.head.convert()
 
-    result = zapi.hostgroup.get(output=['name'], real_hosts='true')
+    result = zapi.hostgroup.get(output=['groupid', 'name'], monitored_hosts='true', search={'name': 'Zabbix servers'},
+                                excludeSearch='true')
 
+    print(result)
     temp = []
-    for i in result:
-        temp.append(i['groupid'])
-        i['name'] = i['name'].split('/')
-    any_group = Node(temp.copy(), '所有')
+    # for i in result:
+    #     temp.append(i['groupid'])
+    #     i['name'] = i['name'].split('/')
+    # any_group = Node(temp.copy(), '所有')
+    #
+    # tree = Tree()
+    #
+    # tree.insert([any_group])
+    #
+    # for item in result:
+    #     node_list = []
+    #     for name in item['name']:
+    #         node_list.append(Node(item['groupid'], name))
+    #     tree.insert(node_list)
 
-    tree = Tree()
+    # response = {
+    #     'hostgroup': tree.convert()['children']}
 
-    tree.insert([any_group])
-
-    for item in result:
-        node_list = []
-        for name in item['name']:
-            node_list.append(Node(item['groupid'], name))
-        tree.insert(node_list)
-
-    response = {
-        'hostgroup': tree.convert()['children']}
-
+    response = []
     return jsonify(response)
 
 
@@ -90,8 +93,6 @@ def get_host():
         output=['snmp_available', 'name', 'status'],
         selectInterfaces=['ip', 'main', 'type'],
         selectInventory=['vendor', 'model', 'type', 'tag'])
-    print(result)
-    print(len(result))
     respone = {'host': result}
 
     return jsonify(respone)
