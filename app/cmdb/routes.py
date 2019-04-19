@@ -5,12 +5,14 @@ from app.cmdb import blueprint
 
 @blueprint.route('/network', methods=['GET'])
 def get_hostgroup_list():
+    # 创建一个节点类
     class Node:
         def __init__(self, value, label):
             self.value = value
             self.label = label
             self.children = []
 
+        # 获取数据
         def get_value(self):
             return self.value
 
@@ -20,7 +22,8 @@ def get_hostgroup_list():
         def get_child(self):
             return self.children
 
-        def add(self, node):
+
+        def add_children(self, node):
             if isinstance(self.value, list):
                 self.value.append(node.get_value())
             else:
@@ -47,7 +50,7 @@ def get_hostgroup_list():
                     flag = True
                     for i in cur:
                         if i.get_label() == node.get_label():
-                            cur = i.add(node)
+                            cur = i.add_children(node)
                             flag = False
                             break
                     if flag:
