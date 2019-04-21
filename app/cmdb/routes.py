@@ -8,57 +8,49 @@ def get_hostgroup_list():
     # 创建一个节点类
     class Node:
         def __init__(self, value, label):
-            self.value = value
+            self.value = [value]
             self.label = label
-            self.children = []
+            self.child = []
+            self.parent = None
 
-        # 获取数据
-        def get_value(self):
-            return self.value
-
-        def get_label(self):
-            return self.label
-
-        def get_child(self):
-            return self.children
-
-
-        def add_children(self, node):
-            if isinstance(self.value, list):
-                self.value.append(node.get_value())
-            else:
-                self.value = [self.get_value()]
-                self.value.append(node.get_value())
-
-            return self.children
+        # 添加数值和子树
+        def add_child(self, node):
+            self.value.appen(node.value[0])
+            self.child.append(node)
 
         def convert(self):
-            if self.children:
-                return {'value': self.value, 'label': self.label, 'children': [i.convert() for i in self.children]}
+            if self.child:
+                return {'value': self.value, 'label': self.label, 'children': [i.convert() for i in self.child]}
             else:
                 return {'value': self.value, 'label': self.label}
 
+    # 创建一个多叉树
     class Tree:
-        def __init__(self, node=Node('', 'root')):
+        #
+        def __init__(self, node=Node('', '')):
             self.head = node
 
+        def search(self):
+            for i in self.head.get_child():
+                pass
+
         def insert(self, node_list):
-            cur = self.head.children
+            current = self.head
 
             for node in node_list:
-                if cur:
+                if current.child:
                     flag = True
-                    for i in cur:
-                        if i.get_label() == node.get_label():
-                            cur = i.add_children(node)
+                    for cur in current.child:
+                        if cur.label == node.label:
+                            cur.add_children(node)
+                            current=cur
                             flag = False
                             break
                     if flag:
                         cur.append(node)
                         cur = node.get_child()
                 else:
-                    cur.append(node)
-                    cur = node.get_child()
+                    current.add_child(node)
 
         def convert(self):
             return self.head.convert()
