@@ -11,11 +11,12 @@ def get_hostgroup_list():
             self.value = [value]
             self.label = label
             self.child = []
-            self.parent = None
 
         # 添加数值和子树
+        def add_value(self, node):
+            self.value.append(node.value[0])
+
         def add_child(self, node):
-            self.value.appen(node.value[0])
             self.child.append(node)
 
         def convert(self):
@@ -39,46 +40,47 @@ def get_hostgroup_list():
 
             for node in node_list:
                 if current.child:
-                    flag = True
+                    match = False
                     for cur in current.child:
                         if cur.label == node.label:
-                            cur.add_children(node)
-                            current=cur
-                            flag = False
+                            cur.add_value(node)
+                            current = cur
+                            match = True
                             break
-                    if flag:
-                        cur.append(node)
-                        cur = node.get_child()
+                    if not match:
+                        current.add_child(node)
+                        current = node
                 else:
                     current.add_child(node)
+                    current = node
 
-        def convert(self):
-            return self.head.convert()
+        def get_root(self):
+            return self.head
 
     result = zapi.hostgroup.get(output=['groupid', 'name'], monitored_hosts='true', search={'name': 'Zabbix servers'},
                                 excludeSearch='true')
 
-    print(result)
+    # 获取所有的节点
     temp = []
-    # for i in result:
-    #     temp.append(i['groupid'])
-    #     i['name'] = i['name'].split('/')
-    # any_group = Node(temp.copy(), '所有')
-    #
-    # tree = Tree()
-    #
-    # tree.insert([any_group])
-    #
-    # for item in result:
-    #     node_list = []
-    #     for name in item['name']:
-    #         node_list.append(Node(item['groupid'], name))
-    #     tree.insert(node_list)
+    for i in result:
+        temp.append(i['groupid'])
+        i['name'] = i['name'].split('/')
+    all_group = Node(temp.copy(), '所有')
 
-    # response = {
-    #     'hostgroup': tree.convert()['children']}
+    # 创建树添加所有节点
+    tree = Tree()
+    tree.insert([all_group])
 
-    response = []
+    # 添加子树的列
+    for i in result:
+        node_list = []
+        for name in i['name']:
+            node_list.append(Node(i['groupid'], name))
+        tree.insert(node_list)
+
+    response = {
+        'hostgroup': tree.get_root().convert()['children']}
+    print(response)
     return jsonify(response)
 
 
