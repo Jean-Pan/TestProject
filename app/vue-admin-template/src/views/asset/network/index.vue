@@ -7,7 +7,9 @@
       filterable
       expand-trigger="hover"
       change-on-select
-      size="mini"/>
+      visible-change="false"
+      size="mini"
+      @close="getHost"/>
     <el-button-group>
       <el-button type="primary" size="mini">创建设备</el-button>
       <el-button type="primary" size="mini">导入</el-button>
@@ -89,7 +91,7 @@
       <el-row type="flex" justify="center">
         <el-table
           :data="host.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-          :default-sort = "{prop: 'name'}"
+          :default-sort="{prop: 'name'}"
           style="width: 100%"
           tooltip-effect="dark"
           size="small">
@@ -197,7 +199,7 @@ export default {
         that.hostgroup = data
       })
     },
-    getHost() {
+    getHost(val, row) {
       var that = this
       const path = 'http://127.0.0.1:5000/asset/network'
       axios.post(path).then(function(response) {

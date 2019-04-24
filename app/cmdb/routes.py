@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from app.zabbix import zapi
 from app.cmdb import blueprint
 
@@ -27,8 +27,8 @@ def get_hostgroup_list():
 
     # 创建一个多叉树
     class Tree:
-        #
         def __init__(self, node=Node('', '')):
+            node.add_child(Node('', '所有'))
             self.head = node
 
         def search(self):
@@ -36,6 +36,7 @@ def get_hostgroup_list():
                 pass
 
         def insert(self, node_list):
+            self.head.child[0].add_value(node_list[-1])
             current = self.head
 
             for node in node_list:
@@ -60,20 +61,13 @@ def get_hostgroup_list():
     result = zapi.hostgroup.get(output=['groupid', 'name'], monitored_hosts='true', search={'name': 'Zabbix servers'},
                                 excludeSearch='true')
 
-    # 获取所有的节点
-    temp = []
-    for i in result:
-        temp.append(i['groupid'])
-        i['name'] = i['name'].split('/')
-    all_group = Node(temp.copy(), '所有')
-
-    # 创建树添加所有节点
+    # 创建树
     tree = Tree()
-    tree.insert([all_group])
 
     # 添加子树的列
     for i in result:
         node_list = []
+        i['name'] = i['name'].split('/')
         for name in i['name']:
             node_list.append(Node(i['groupid'], name))
         tree.insert(node_list)
@@ -86,6 +80,7 @@ def get_hostgroup_list():
 
 @blueprint.route('/network', methods=['POST'])
 def get_host():
+    print(request.form.get('value'))
     result = zapi.host.get(
         output=['snmp_available', 'name', 'status'],
         selectInterfaces=['ip', 'main', 'type'],
