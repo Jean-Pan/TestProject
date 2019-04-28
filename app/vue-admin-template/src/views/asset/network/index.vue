@@ -1,22 +1,23 @@
 <template>
   <div class="app-container">
-    <el-button @click="getHost">test</el-button>
+    <!--  主机群多级下来框  -->
     <el-cascader
       :options="hostgroup"
+      v-model="groupids"
       placeholder="所有"
-      filterable
       expand-trigger="hover"
       change-on-select
-      visible-change="false"
       size="mini"
-      @close="getHost"/>
-    <el-button-group>
-      <el-button type="primary" size="mini">创建设备</el-button>
-      <el-button type="primary" size="mini">导入</el-button>
-    </el-button-group>
+      @visible-change="getHost($event,groupids)"/>
 
+    <!--  创建和导入设备按钮  -->
+    <el-button type="primary" size="mini" style="margin-left: 10px">创建设备</el-button>
+    <el-button type="primary" size="mini">导入</el-button>
+
+    <!--  多条件筛选显示与否按钮  -->
     <el-button round size="mini" style="float: right" @click="show=!show">过滤器</el-button>
 
+    <!--  多条件筛选输入主体  -->
     <transition name="el-fade-in-linear">
       <el-row :gutter="20" type="flex" justify="center">
         <el-form
@@ -195,17 +196,20 @@ export default {
       var that = this
       const path = 'http://127.0.0.1:5000/asset/network'
       axios.get(path).then(function(response) {
-        var data = response.data.hostgroup
+        var data = response.data
         that.hostgroup = data
       })
     },
-    getHost(val, row) {
-      var that = this
-      const path = 'http://127.0.0.1:5000/asset/network'
-      axios.post(path).then(function(response) {
-        var data = response.data.host
-        that.host = data
-      })
+    getHost(event, groupids) {
+      if (event === false) {
+        console.log(groupids)
+        var that = this
+        const path = 'http://127.0.0.1:5000/asset/network'
+        axios.post(path, groupids).then(function(response) {
+          var data = response.data
+          that.host = data
+        })
+      }
     },
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage

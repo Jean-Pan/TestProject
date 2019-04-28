@@ -72,19 +72,20 @@ def get_hostgroup_list():
             node_list.append(Node(i['groupid'], name))
         tree.insert(node_list)
 
-    response = {
-        'hostgroup': tree.get_root().convert()['children']}
-    print(response)
+    response = tree.get_root().convert()['children']
+    # print(response)
+
     return jsonify(response)
 
 
 @blueprint.route('/network', methods=['POST'])
 def get_host():
-    print(request.form.get('value'))
-    result = zapi.host.get(
+    data = request.get_json()
+
+    response = zapi.host.get(
+        groupids=data[-1],
         output=['snmp_available', 'name', 'status'],
         selectInterfaces=['ip', 'main', 'type'],
         selectInventory=['vendor', 'model', 'type', 'tag'])
-    respone = {'host': result}
 
-    return jsonify(respone)
+    return jsonify(response)
