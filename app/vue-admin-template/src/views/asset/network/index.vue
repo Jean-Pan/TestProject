@@ -11,8 +11,12 @@
       @visible-change="getHost($event,groupids)"/>
 
     <!--  创建和导入设备按钮  -->
-    <el-button type="primary" size="mini" style="margin-left: 10px">创建设备</el-button>
+    <el-button type="primary" size="mini" style="margin-left: 11px" @click="dialogTableVisible = true">创建设备</el-button>
     <el-button type="primary" size="mini">导入</el-button>
+
+    <el-dialog :visible.sync="dialogTableVisible" title="收货地址">
+      <span>这是一段信息</span>
+    </el-dialog>
 
     <!--  多条件筛选显示与否按钮  -->
     <el-button round size="mini" style="float: right" @click="show=!show">过滤器</el-button>
@@ -88,18 +92,22 @@
       </el-row>
     </transition>
 
+    <!--  表格框架样式为卡片  -->
     <el-card class="box-card" style="margin-top: 20px">
+
       <el-row type="flex" justify="center">
+        <!--  表格主体  -->
         <el-table
           :data="host.slice((currentPage-1)*pageSize,currentPage*pageSize)"
           :default-sort="{prop: 'name'}"
           style="width: 100%"
           tooltip-effect="dark"
-          size="small">
+          size="medium">
 
           <el-table-column
             type="selection"
             align="center"/>
+
           <el-table-column
             label="状态"
             align="center"
@@ -110,38 +118,47 @@
               <svg-icon v-else icon-class="round_question_fill"/>
             </template>
           </el-table-column>
+
           <el-table-column
             prop="name"
             label="设备名称"
             sortable/>
+
           <el-table-column
-            prop="name"
+            prop="inventory.asset_tag"
             label="设备编号"
             sortable/>
+
           <el-table-column
-            prop="name"
+            prop="inventory.date_hw_install"
             label="安装时间"
             sortable/>
+
           <el-table-column
             prop="inventory.vendor"
             label="设备品牌"
             sortable/>
+
           <el-table-column
             prop="inventory.model"
             label="设备型号"
             sortable/>
+
           <el-table-column
             prop="inventory.type"
             label="设备类型"
             sortable/>
+
           <el-table-column
             prop="interfaces[0].ip"
             label="IP地址"
             sortable/>
+
           <el-table-column
             prop="inventory.tag"
             label="应用系统"
             sortable/>
+
           <el-table-column
             prop="status"
             label="启用/禁用"
@@ -155,6 +172,7 @@
                 @change="handleSwitch(scope.row,scope.$index)"/>
             </template>
           </el-table-column>
+
         </el-table>
       </el-row>
       <el-pagination
@@ -182,6 +200,7 @@ export default {
   data() {
     return {
       show: false,
+      dialogTableVisible: false,
       host: [],
       hostgroup: [],
       currentPage: 1,
@@ -202,7 +221,6 @@ export default {
     },
     getHost(event, groupids) {
       if (event === false) {
-        console.log(groupids)
         var that = this
         const path = 'http://127.0.0.1:5000/asset/network'
         axios.post(path, groupids).then(function(response) {
