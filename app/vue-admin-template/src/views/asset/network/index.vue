@@ -11,21 +11,31 @@
       @visible-change="getHost($event,groupids)"/>
 
     <!--  创建和导入设备按钮  -->
-    <el-button type="primary" size="mini" style="margin-left: 11px" @click="dialogTableVisible = true">创建设备</el-button>
+    <el-button type="primary" size="mini" style="margin-left: 11px" @click="dialogTableVisible = true">添加设备</el-button>
     <el-button type="primary" size="mini">导入</el-button>
 
-    <el-dialog :visible.sync="dialogTableVisible" title="收货地址">
-      <span>这是一段信息</span>
+    <el-dialog
+      :visible.sync="dialogTableVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      title="收货地址">
+      <el-form>
+
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" size="mini" @click="dialogTableVisible = false">添加</el-button>
+        <el-button size="mini" @click="dialogTableVisible = false">取消</el-button>
+      </span>
     </el-dialog>
 
     <!--  多条件筛选显示与否按钮  -->
-    <el-button round size="mini" style="float: right" @click="show=!show">过滤器</el-button>
+    <el-button round size="mini" style="float: right" @click="filterVisible=!filterVisible">过滤器</el-button>
 
     <!--  多条件筛选输入主体  -->
     <transition name="el-fade-in-linear">
       <el-row :gutter="20" type="flex" justify="center">
         <el-form
-          v-show="show"
+          v-show="filterVisible"
           ref="form"
           :model="form"
           size="mini"
@@ -120,9 +130,14 @@
           </el-table-column>
 
           <el-table-column
-            prop="name"
             label="设备名称"
-            sortable/>
+            sortable>
+            <template slot-scope="host">
+              <el-button type="text" size="mini" @click="dialogTableVisible = true">
+                {{ host.row.name }}
+              </el-button>
+            </template>
+          </el-table-column>
 
           <el-table-column
             prop="inventory.asset_tag"
@@ -199,7 +214,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      show: false,
+      filterVisible: false,
       dialogTableVisible: false,
       host: [],
       hostgroup: [],
