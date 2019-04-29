@@ -19,8 +19,10 @@
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       title="收货地址">
-      <el-form>
-
+      <el-form :inline="true">
+        <el-form-item label="设备名称">
+          <el-input/>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" size="mini" @click="dialogTableVisible = false">添加</el-button>
